@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TimeSync (日程調整アプリ)
 
-## Getting Started
+友達やグループでの日程調整をスムーズにするためのWebアプリケーションです。
+面倒な会員登録なしで、イベントを作成し、URLをシェアするだけで調整を開始できます。
 
-First, run the development server:
+## ✨ 主な機能
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **カンタン作成**: イベント名と候補日を選ぶだけ。
+- **URLシェア**: 参加者にリンクを送るだけで投票開始。
+- **リッチな投票機能**: ◎(希望)/〇(OK)/△(調整)の3段階評価。時間指定やコメントも可能。
+- **リアルタイム集計**: 投票結果は即座に反映。
+- **ランキング表示**: 人気の日程が一目でわかるスコアリング機能。
+- **カレンダー表示**: 直感的なカレンダービューで状況を把握。
+- **管理者機能**: 日程の確定、削除、NG日程の設定など。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ 技術スタック
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: Firebase (Firestore)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 使い方
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. イベントを作成し、管理者用URLを保存します。
+2. 参加者用URLをLINEなどで友だちにシェアします。
+3. 全員の回答が集まったら、管理者が「決定ボタン」で日程を確定します。
