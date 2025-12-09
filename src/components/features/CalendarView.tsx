@@ -9,9 +9,10 @@ interface CalendarViewProps {
     currentMonth: Date;
     onDateClick: (date: Date) => void;
     onDateLongPress: (date: Date) => void;
+    isOrganizer?: boolean;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ event, responses, currentMonth, onDateClick, onDateLongPress }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({ event, responses, currentMonth, onDateClick, onDateLongPress, isOrganizer }) => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -67,7 +68,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ event, responses, cu
                         hover:bg-sky-50 cursor-pointer
                     `}
                     key={day.toString()}
-                    onClick={() => onDateClick(cloneDay)}
+                    onClick={(e) => {
+                        // Ignore if it's not a primary click (left click)
+                        if (e.button !== 0) return;
+                        onDateClick(cloneDay);
+                    }}
                     onContextMenu={(e) => {
                         e.preventDefault();
                         onDateLongPress(cloneDay);
@@ -77,7 +82,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ event, responses, cu
                         <span className={`text-sm font-bold ${format(day, 'E') === 'Sat' ? 'text-blue-400' : format(day, 'E') === 'Sun' ? 'text-red-400' : ''}`}>
                             {formattedDate}
                         </span>
-                        {score > 0 && !isImpossible && (
+                        {isOrganizer && score > 0 && !isImpossible && (
                             <span className="text-xs font-bold bg-sky-100 text-sky-700 px-1.5 rounded-full">
                                 {score}pt
                             </span>

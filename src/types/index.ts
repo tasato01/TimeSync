@@ -35,6 +35,10 @@ export interface EventData {
         date: string;
         timeRange?: string;
     } | null;
+    finalizedMeetingPlace?: string;
+    finalizedPlace?: string;
+    finalizedUrl?: string;
+    finalizedNotes?: string;
     targetCount?: number;
     scheduleLimit?: string;
     votingDeadline?: string;

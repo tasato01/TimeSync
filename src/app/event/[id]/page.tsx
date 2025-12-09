@@ -15,6 +15,8 @@ import { CalendarView } from '@/components/features/CalendarView';
 import { EventEditModal } from '@/components/features/EventEditModal';
 
 import { DateDetailsModal } from '@/components/features/DateDetailsModal';
+import { FinalizeModal } from '@/components/features/FinalizeModal';
+import { FinalizedBanner } from '@/components/features/FinalizedBanner';
 
 export default function EventPage() {
     const { id } = useParams();
@@ -30,6 +32,7 @@ export default function EventPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [detailsDate, setDetailsDate] = useState<Date | null>(null);
+    const [finalizeDate, setFinalizeDate] = useState<string | null>(null);
     const [isOrganizerMode, setIsOrganizerMode] = useState(false); // Toggle for organizer to block dates
     const [myDeviceId, setMyDeviceId] = useState('');
 
@@ -140,45 +143,33 @@ export default function EventPage() {
     };
 
     // Finalize Event (Organizer Only)
-    const handleFinalize = async (dateStr: string) => {
-        if (!event) return;
+    const handleFinalize = (dateStr: string) => {
+        setFinalizeDate(dateStr);
+    };
 
-        // Warnings Check
-        const dateResponses = responses.flatMap(r => r.availabilities).filter(a => a.date === dateStr);
-        const adjustCount = dateResponses.filter(a => a.status === 0).length;
-        const totalVotes = responses.length;
-        const target = event.targetCount || 0;
-
-        let warningMsg = '';
-        if (target > 0 && totalVotes < target) {
-            warningMsg = warningMsg + '・目標人数(' + target + '人)に達していません(現在' + totalVotes + '人)\n';
-        }
-        if (adjustCount > 0) {
-            warningMsg = warningMsg + '・「△調整」の人が' + adjustCount + '人います\n';
-        }
-
-        if (warningMsg) {
-            if (!confirm('【注意】\n' + warningMsg + '\nそれでも決定しますか？')) return;
-        }
-
-        if (!confirm(dateStr + ' でイベントを決定しますか？')) return;
+    const handleConfirmFinalize = async (details: { timeRange: string; meetingPlace: string; place: string; url: string; notes: string }) => {
+        if (!event || !finalizeDate) return;
 
         try {
             await updateDoc(doc(db, 'events', event.id!), {
                 status: 'finalized',
                 finalizedDate: {
-                    date: dateStr,
-                    timeRange: '時間未定'
-                }
+                    date: finalizeDate,
+                    timeRange: details.timeRange
+                },
+                finalizedMeetingPlace: details.meetingPlace,
+                finalizedPlace: details.place,
+                finalizedUrl: details.url,
+                finalizedNotes: details.notes
             });
+            setFinalizeDate(null);
         } catch (e) {
             console.error(e);
-            alert('決定に失敗しました');
+            alert('エラーが発生しました');
         }
     };
 
-    // Organizer Actions
-    const handleUndoFinalize = async () => {
+    const handleCancelFinalize = async () => {
         if (!event || !confirm('決定を取り消して調整中に戻しますか？')) return;
         if (!event.id) return;
         await updateDoc(doc(db, 'events', event.id), {
@@ -206,14 +197,26 @@ export default function EventPage() {
 
     const copyInfo = () => {
         if (!event?.finalizedDate) return;
-        const text = `
-【${event.title}】
-開催日時がきまりました！
-📅 ${format(new Date(event.finalizedDate.date), 'M月d日 (E)', { locale: ja })}
-🔗 ${window.location.href.split('?')[0]}
 
-回答ありがとうございました！
-`.trim();
+        let text = `【${event.title}】\n開催日時がきまりました！\n\n`;
+        text += `📅 ${format(new Date(event.finalizedDate.date), 'M月d日 (E)', { locale: ja })}\n`;
+        if (event.finalizedDate.timeRange) text += `⏰ ${event.finalizedDate.timeRange}\n`;
+
+        if (event.finalizedPlace) {
+            text += `📍 会場: ${event.finalizedPlace}\n`;
+            if (event.finalizedUrl) text += `   ${event.finalizedUrl}\n`;
+        }
+
+        if (event.finalizedMeetingPlace) {
+            text += `🚩 集合: ${event.finalizedMeetingPlace}\n`;
+        }
+
+        if (event.finalizedNotes) {
+            text += `\n📝 案内:\n${event.finalizedNotes}\n`;
+        }
+
+        text += `\n🔗 ${window.location.href.split('?')[0]}\n\n回答ありがとうございました！`;
+
         navigator.clipboard.writeText(text);
         alert('案内文をコピーしました！');
     };
@@ -296,30 +299,22 @@ export default function EventPage() {
                 </div>
             </header>
 
-            {/* Finalized Banner */}
-            {event?.status === 'finalized' && (
-                <div className="mb-8 animate-in zoom-in duration-300">
-                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-                        <div className="text-center py-6">
-                            <h2 className="text-sm font-bold text-green-600 mb-2 tracking-widest uppercase">DECIDED</h2>
-                            <div className="text-4xl sm:text-5xl font-bold text-slate-800 mb-4">
-                                {format(new Date(event.finalizedDate!.date), 'M月d日 (E)', { locale: ja })}
-                            </div>
-                            <p className="text-slate-500 mb-6">
-                                予定が決定しました！参加者に知らせましょう。
-                            </p>
-                            <div className="flex justify-center gap-4">
-                                <Button onClick={copyInfo}>📋 案内文をコピー</Button>
-                                {isOrganizer && (
-                                    <Button variant="ghost" onClick={handleUndoFinalize} className="text-slate-400 font-normal">
-                                        決定を取り消す
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    </Card>
-                </div>
+            {/* Finalize Modal */}
+            {finalizeDate && (
+                <FinalizeModal
+                    date={finalizeDate}
+                    isOpen={!!finalizeDate}
+                    onClose={() => setFinalizeDate(null)}
+                    onConfirm={handleConfirmFinalize}
+                />
             )}
+
+            <FinalizedBanner
+                event={event!}
+                isOrganizer={isOrganizer}
+                onCopyInfo={copyInfo}
+                onUndo={handleCancelFinalize}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Main Calendar Area */}
@@ -341,6 +336,7 @@ export default function EventPage() {
                             currentMonth={currentMonth}
                             onDateClick={handleDateClick}
                             onDateLongPress={(d) => setDetailsDate(d)}
+                            isOrganizer={isOrganizer}
                         />
                     </div>
 
@@ -373,6 +369,7 @@ export default function EventPage() {
                             responses={responses}
                             event={event!}
                             onDecide={isOrganizer ? handleFinalize : undefined}
+                            isOrganizer={isOrganizer}
                         />
                     </Card>
                 </div>

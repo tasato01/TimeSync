@@ -116,24 +116,29 @@ export const EventEditModal: React.FC<EventEditModalProps> = ({ event, isOpen, o
                         <p className="text-xs text-slate-400">※この日付を過ぎると参加者は投票できなくなります</p>
                     </div>
 
-                    <div className="flex gap-3 pt-4 border-t border-slate-100 mt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} className="flex-1">
-                            キャンセル
-                        </Button>
-                        <Button type="submit" className="flex-1">
-                            保存する
-                        </Button>
+                    <div className="flex gap-3 pt-4">
+                        <Button variant="secondary" className="flex-1" onClick={onClose}>キャンセル</Button>
+                        <Button className="flex-1" onClick={handleSubmit}>保存する</Button>
                     </div>
 
-                    <div className="pt-4 mt-2 border-t border-slate-100 text-center">
-                        <button
-                            type="button"
-                            onClick={onDelete}
-                            className="text-xs text-red-400 hover:text-red-500 underline"
-                        >
-                            このイベントを削除する
-                        </button>
-                    </div>
+                    {onDelete && (
+                        <div className="mt-8 pt-6 border-t border-slate-100">
+                            <h3 className="text-sm font-bold text-red-500 mb-2">危険な操作</h3>
+                            <p className="text-xs text-slate-500 mb-3">
+                                一度削除すると、元に戻すことはできません。全ての投票データが失われます。
+                            </p>
+                            <button
+                                onClick={() => {
+                                    if (confirm('本当にこのイベントを削除しますか？')) {
+                                        onDelete();
+                                    }
+                                }}
+                                className="w-full py-3 text-red-500 border border-red-200 rounded-xl hover:bg-red-50 font-bold text-sm transition-colors"
+                            >
+                                このイベントを削除する
+                            </button>
+                        </div>
+                    )}
                 </form>
             </Card>
         </div>

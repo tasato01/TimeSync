@@ -7,9 +7,10 @@ interface RankingListProps {
     responses: ParticipantResponse[];
     event: EventData;
     onDecide?: (date: string) => void;
+    isOrganizer: boolean;
 }
 
-export const RankingList: React.FC<RankingListProps> = ({ responses, event, onDecide }) => {
+export const RankingList: React.FC<RankingListProps> = ({ responses, event, onDecide, isOrganizer }) => {
     // 1. Flatten all availabilities
     const scores: Record<string, {
         score: number,
@@ -82,7 +83,8 @@ export const RankingList: React.FC<RankingListProps> = ({ responses, event, onDe
                                         {format(new Date(dateStr), 'M/d (EEE)', { locale: ja })}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-0.5">
-                                        {data.score}pt (◎{data.hope} / 〇{data.ok})
+                                        {isOrganizer && <span className="mr-1 font-bold text-teal-600">{data.score}pt</span>}
+                                        (◎{data.hope} / 〇{data.ok})
                                     </div>
                                 </div>
                             </div>
