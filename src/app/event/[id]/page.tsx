@@ -400,6 +400,13 @@ export default function EventPage() {
                 />
             )}
 
+            {/* Branding Footer */}
+            <div className="mt-12 mb-6 text-center">
+                <p className="text-slate-300 font-bold tracking-widest text-xs font-mono">
+                    TimeSync
+                </p>
+            </div>
+
             {/* Edit Modal */}
             {event && (
                 <EventEditModal
