@@ -110,7 +110,7 @@ export const VoteModal: React.FC<VoteModalProps> = ({ date, onClose, onSave, isO
                     {/* Time Selection */}
                     {status !== 0 && (
                         <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <label className="text-sm font-medium text-slate-600 ml-1">時間指定 (ある場合-1点)</label>
+                            <label className="text-sm font-medium text-slate-600 ml-1">時間指定</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="time"
